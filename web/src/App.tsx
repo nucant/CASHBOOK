@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { DataProvider } from './context/DataContext';
+import { ToastProvider } from './context/ToastContext';
 import { useDeviceMode, type ViewMode } from './hooks/useDeviceMode';
 import type { Theme } from './pages/Settings';
 import { MobileApp } from './layouts/MobileApp';
@@ -45,10 +46,12 @@ export default function App() {
   }
 
   return (
-    <DataProvider>
-      {resolvedMode === 'desktop' && <DesktopApp theme={theme} onThemeChange={setTheme} mode={mode} onModeChange={setMode} />}
-      {resolvedMode === 'tablet' && <TabletApp theme={theme} onThemeChange={setTheme} mode={mode} onModeChange={setMode} />}
-      {resolvedMode === 'mobile' && <MobileApp theme={theme} onThemeChange={setTheme} mode={mode} onModeChange={setMode} />}
-    </DataProvider>
+    <ToastProvider>
+      <DataProvider>
+        {resolvedMode === 'desktop' && <DesktopApp theme={theme} onThemeChange={setTheme} mode={mode} onModeChange={setMode} />}
+        {resolvedMode === 'tablet' && <TabletApp theme={theme} onThemeChange={setTheme} mode={mode} onModeChange={setMode} />}
+        {resolvedMode === 'mobile' && <MobileApp theme={theme} onThemeChange={setTheme} mode={mode} onModeChange={setMode} />}
+      </DataProvider>
+    </ToastProvider>
   );
 }

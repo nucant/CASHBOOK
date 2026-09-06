@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { X, Trash2, Loader2 } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { useToast } from '../context/ToastContext';
 import type { Transaction, TxType } from '../lib/types';
 import { CategoryIcon } from './CategoryIcon';
 
@@ -12,6 +13,7 @@ export function AddTransactionSheet({
   editing?: Transaction | null;
 }) {
   const { accounts, categories, addTransaction, updateTransaction, deleteTransaction } = useData();
+  const { showToast } = useToast();
 
   const [type, setType] = useState<TxType>(editing?.type ?? 'expense');
   const [amount, setAmount] = useState(editing ? String(editing.amount) : '');
@@ -19,7 +21,6 @@ export function AddTransactionSheet({
   const [categoryId, setCategoryId] = useState<string | undefined>(editing?.categoryId);
   const [date, setDate] = useState(editing?.date ?? new Date().toISOString().slice(0, 10));
   const [note, setNote] = useState(editing?.note ?? '');
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!accountId && accounts.length) setAccountId(accounts[0].id);
@@ -36,11 +37,10 @@ export function AddTransactionSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, categories]);
 
-  const canSave = Number(amount) > 0 && accountId && categoryId && date && !saving;
+  const canSave = Number(amount) > 0 && accountId && categoryId && date;
 
-  async function handleSave() {
+  function handleSave() {
     if (!canSave) return;
-    setSaving(true);
     const payload = {
       accountId: accountId!,
       categoryId: categoryId!,
@@ -49,27 +49,20 @@ export function AddTransactionSheet({
       note: note.trim() || undefined,
       date,
     };
-    try {
-      if (editing?.id) {
-        await updateTransaction(editing.id, payload);
-      } else {
-        await addTransaction(payload);
-      }
-      onClose();
-    } finally {
-      setSaving(false);
-    }
+    onClose();
+    const promise = editing?.id ? updateTransaction(editing.id, payload) : addTransaction(payload);
+    promise
+      .then(() => showToast('Saved', 'success'))
+      .catch(() => showToast('Failed to save — check connection', 'error'));
   }
 
-  async function handleDelete() {
+  function handleDelete() {
     if (!editing?.id) return;
-    setSaving(true);
-    try {
-      await deleteTransaction(editing.id);
-      onClose();
-    } finally {
-      setSaving(false);
-    }
+    const id = editing.id;
+    onClose();
+    deleteTransaction(id)
+      .then(() => showToast('Deleted', 'success'))
+      .catch(() => showToast('Failed to delete — check connection', 'error'));
   }
 
   return (
@@ -177,8 +170,7 @@ export function AddTransactionSheet({
             <button
               type="button"
               onClick={handleDelete}
-              disabled={saving}
-              className="flex items-center justify-center rounded-2xl border border-[var(--border)] px-4 text-[var(--expense)] disabled:opacity-40"
+              className="flex items-center justify-center rounded-2xl border border-[var(--border)] px-4 text-[var(--expense)]"
               aria-label="Delete"
             >
               <Trash2 size={18} />
@@ -190,7 +182,6 @@ export function AddTransactionSheet({
             onClick={handleSave}
             className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[var(--hero)] py-3.5 text-sm font-semibold text-white disabled:opacity-40"
           >
-            {saving && <Loader2 size={16} className="animate-spin" />}
             {editing ? 'Save Changes' : 'Add Transaction'}
           </button>
         </div>

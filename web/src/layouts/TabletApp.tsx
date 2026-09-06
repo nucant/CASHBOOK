@@ -3,6 +3,7 @@ import { Bell, AlertTriangle } from 'lucide-react';
 import { type Transaction } from '../lib/types';
 import { useData } from '../context/DataContext';
 import { BottomNav, type Page } from '../components/BottomNav';
+import { PacmanLoader } from '../components/PacmanLoader';
 import { AddTransactionSheet } from '../components/AddTransactionSheet';
 import { TabletDashboard } from '../pages/TabletDashboard';
 import { Statistics } from '../pages/Statistics';
@@ -72,7 +73,7 @@ export function TabletApp({
 
       <main className="flex-1 pb-8">
         {!ready && configured ? (
-          <div className="flex h-40 items-center justify-center text-sm text-[var(--muted)]">Loading…</div>
+          <PacmanLoader label="Loading your data…" />
         ) : (
           <>
             {page === 'home' && <TabletDashboard onEdit={openEdit} />}

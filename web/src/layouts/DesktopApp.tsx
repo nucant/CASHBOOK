@@ -3,6 +3,7 @@ import { Bell, Plus, AlertTriangle } from 'lucide-react';
 import type { Transaction } from '../lib/types';
 import { useData } from '../context/DataContext';
 import { Sidebar, type DesktopPage } from '../components/Sidebar';
+import { PacmanLoader } from '../components/PacmanLoader';
 import { AddTransactionSheet } from '../components/AddTransactionSheet';
 import { Overview } from '../pages/desktop/Overview';
 import { TransactionsTable } from '../pages/desktop/TransactionsTable';
@@ -89,7 +90,7 @@ export function DesktopApp({
           )}
 
           {!ready && configured ? (
-            <div className="flex h-40 items-center justify-center text-sm text-[var(--muted)]">Loading…</div>
+            <PacmanLoader label="Loading your data…" />
           ) : (
             <>
               {page === 'overview' && <Overview onNavigate={setPage} onEdit={openEdit} />}
