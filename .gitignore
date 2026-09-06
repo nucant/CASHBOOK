@@ -1,0 +1,7 @@
+# Reference APKs (not part of the app)
+*.apk
+*.apkm
+
+# Editor/OS
+.DS_Store
+Thumbs.db

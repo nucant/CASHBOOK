@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cashbook — Project Report</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  color-scheme: light dark;
+  --bg:#f6f4ef; --card:#ffffff; --border:#e2ddd2; --text:#211f1a; --muted:#726b5c;
+  --accent:#3d6b52; --accent-soft:#e4ede6; --danger:#a8442c;
+  --serif:"Fraunces","Source Serif 4",Georgia,serif;
+  --sans:"Source Sans 3",ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#1a1815; --card:#231f1a; --border:#38332b; --text:#f1ede4; --muted:#a49a87;
+    --accent:#7fc9a2; --accent-soft:#22322a;
+  }
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+.wrap{max-width:860px;margin:0 auto;padding:40px 22px 90px;}
+header{margin-bottom:32px;}
+.eyebrow{color:var(--accent);font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px;}
+h1{font-family:var(--serif);font-weight:600;font-size:2rem;margin:0 0 8px;text-wrap:balance;letter-spacing:-.01em;}
+.sub{color:var(--muted);font-size:.95rem;max-width:62ch;margin:0;}
+.updated{color:var(--muted);font-size:.8rem;margin-top:14px;}
+h2{font-family:var(--serif);font-weight:600;font-size:1.25rem;margin:0 0 16px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;}
+.field{border-bottom:1px solid var(--border);padding-bottom:12px;}
+.field:last-child{border-bottom:none;}
+.field .k{font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;margin-bottom:5px;}
+.field .v{font-size:.96rem;}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.tag{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 12px;font-size:.82rem;font-weight:600;}
+table{width:100%;border-collapse:collapse;font-size:.9rem;}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:top;}
+th{color:var(--muted);font-weight:600;font-size:.76rem;text-transform:uppercase;letter-spacing:.04em;}
+.badge{display:inline-block;padding:3px 11px;border-radius:999px;font-size:.76rem;font-weight:600;white-space:nowrap;}
+.badge.done{background:var(--accent-soft);color:var(--accent);}
+.badge.progress{background:#f5e3ba;color:#7a5a12;}
+@media (prefers-color-scheme: dark){ .badge.progress{background:#3a2f14;color:#e0b85c;} }
+.badge.planned{background:var(--border);color:var(--muted);}
+.note{color:var(--muted);font-size:.85rem;margin-top:14px;}
+code{font-family:ui-monospace,Consolas,monospace;background:var(--accent-soft);color:var(--accent);padding:.1em .4em;border-radius:5px;font-size:.88em;}
+a{color:var(--accent);}
+ol li{line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Cashbook · Expense Tracker</p>
+    <h1>Project Report</h1>
+    <p class="sub">Requirements collected + progress log. Ei file ta local e save thakbe ebong protibar kichu change hole update kore dibo.</p>
+    <p class="updated">Last updated: 6 September 2026 — v3: Google Sheets backend + GitHub Pages deploy ready</p>
+  </header>
+
+  <section class="card">
+    <h2>Requirements (confirmed)</h2>
+    <div class="grid">
+      <div class="field"><div class="k">Currency</div><div class="v">INR (₹)</div></div>
+      <div class="field"><div class="k">Accounts / Wallets</div><div class="v">Multiple — cash, bank, card separately track hobe</div></div>
+      <div class="field"><div class="k">Budget alerts</div><div class="v">Per-category monthly limit</div></div>
+      <div class="field"><div class="k">Theme</div><div class="v">Both — light/dark toggle</div></div>
+      <div class="field"><div class="k">Recurring expenses</div><div class="v">Ha — rent/subscription auto-add each month</div></div>
+      <div class="field"><div class="k">Reports / charts</div>
+        <div class="tags"><span class="tag">Category pie chart</span><span class="tag">Bar chart</span><span class="tag">Monthly trend line</span></div>
+      </div>
+      <div class="field"><div class="k">Export</div><div class="v">PDF</div></div>
+      <div class="field"><div class="k">Login / accounts</div><div class="v">Ekhon lagbe na — online newar age add hobe</div></div>
+      <div class="field"><div class="k">Database</div><div class="v">Google Sheets, via a Google Apps Script Web App acting as the API. Free, no card, no server to keep running.</div></div>
+      <div class="field"><div class="k">Hosting</div><div class="v">GitHub Pages, auto-deployed on every push via GitHub Actions. Laptop doesn't need to stay on.</div></div>
+    </div>
+    <p class="note">Default categories (change korte hole bolben): Food, Transport, Bills, Shopping, Health, Education, Entertainment, Rent, Salary, Other. Accent color: green (money/ledger theme), pore change kora jabe.</p>
+  </section>
+
+  <section class="card">
+    <h2>Going Online — steps left (your side)</h2>
+    <ol style="margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:10px;font-size:.92rem;">
+      <li><strong>Deploy the backend</strong>: open <a href="https://sheets.google.com">sheets.google.com</a> → new blank sheet → Extensions → Apps Script → paste <code>google-apps-script/Code.gs</code> from this project → change the <code>SECRET</code> value to your own random string → Deploy → New deployment → Web app → Execute as "Me" → Who has access "Anyone" → Deploy → approve the permission prompt (Advanced → Go to project) → copy the <code>/exec</code> URL.</li>
+      <li><strong>Install Git</strong> (not present on this machine yet) from <a href="https://git-scm.com/download/win">git-scm.com</a>.</li>
+      <li><strong>Push to GitHub</strong>: create a new repo named <code>cashbook</code> on GitHub → in this project folder run <code>git init</code>, <code>git add .</code>, <code>git commit -m "Cashbook v1"</code>, <code>git remote add origin &lt;your repo URL&gt;</code>, <code>git push -u origin main</code>.</li>
+      <li><strong>Enable Pages</strong>: on the GitHub repo → Settings → Pages → Source: "GitHub Actions". The included workflow builds and deploys automatically on every push.</li>
+      <li><strong>Connect the app</strong>: open the deployed site → Settings → Data Source (Google Sheets) → paste the Web App URL and your SECRET → Save &amp; Test Connection.</li>
+    </ol>
+    <p class="note">Ask Claude for the exact commands or Apps Script code any time — everything above is already written, just needs your Google/GitHub accounts to deploy.</p>
+  </section>
+
+  <section class="card">
+    <h2>Progress Log</h2>
+    <table>
+      <thead><tr><th>Date</th><th>Item</th><th>Status</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>5 Sep 2026</td>
+          <td>Vite + React + TypeScript project scaffolded</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Folder: <code>web/</code> — base structure only, no UI yet</td>
+        </tr>
+        <tr>
+          <td>5 Sep 2026</td>
+          <td>Requirements collected (this report)</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Currency, accounts, budget, theme, recurring, reports, export, login confirmed</td>
+        </tr>
+        <tr>
+          <td>5 Sep 2026</td>
+          <td>Tailwind CSS + Recharts + Dexie (IndexedDB) install, project structure</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Dexie chosen as local database — see database section below</td>
+        </tr>
+        <tr>
+          <td>5 Sep 2026</td>
+          <td>Dashboard screen (balance card, income/expense, recent transactions)</td>
+          <td><span class="badge done">Done</span></td>
+          <td>UI styled after the Dribbble reference — dark balance card, colored stat chips</td>
+        </tr>
+        <tr>
+          <td>5 Sep 2026</td>
+          <td>Add/Edit Transaction form + accounts (cash/bank/card)</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Bottom-sheet form, tap a transaction to edit/delete</td>
+        </tr>
+        <tr>
+          <td>5 Sep 2026</td>
+          <td>Accounts page (multiple wallets, per-account balance)</td>
+          <td><span class="badge done">Done</span></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>5 Sep 2026</td>
+          <td>Statistics page (pie, bar, monthly line trend, week/month/year)</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Verified rendering in browser with real data</td>
+        </tr>
+        <tr>
+          <td>5 Sep 2026</td>
+          <td>Per-category monthly budget limit</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Set from Settings; alert banners on dashboard — planned next</td>
+        </tr>
+        <tr>
+          <td>5 Sep 2026</td>
+          <td>Recurring expenses auto-add</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Rule-based (account, category, amount, day of month) in Settings</td>
+        </tr>
+        <tr>
+          <td>5 Sep 2026</td>
+          <td>PDF export</td>
+          <td><span class="badge done">Done</span></td>
+          <td>"Export all transactions as PDF" button in Settings</td>
+        </tr>
+        <tr>
+          <td>5 Sep 2026</td>
+          <td>Dark/light theme toggle</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Light / Dark / System, saved locally</td>
+        </tr>
+        <tr>
+          <td>6 Sep 2026</td>
+          <td>Budget-limit alert banners</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Over-budget warning on the desktop Budgets page; per-category bars turn red everywhere</td>
+        </tr>
+        <tr>
+          <td>6 Sep 2026</td>
+          <td>Desktop dashboard — separate layout, auto-detected</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Sidebar nav (Overview, Transactions, Statistics, Accounts, Budgets, Settings); switches automatically at ≥1024px screen width</td>
+        </tr>
+        <tr>
+          <td>6 Sep 2026</td>
+          <td>Manual layout override in Settings</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Auto / Mobile / Desktop toggle — tested that Mobile still shows correctly on a wide screen when forced</td>
+        </tr>
+        <tr>
+          <td>6 Sep 2026</td>
+          <td>Desktop-only extra features</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Full Transactions table (search + filter by type/category/account + sortable columns), Budgets page with per-category limits and over-budget alert, income/expense vs last-month % change on Overview, bar chart category comparison alongside pie + trend line</td>
+        </tr>
+        <tr>
+          <td>6 Sep 2026</td>
+          <td>Migrated database: IndexedDB → Google Sheets</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Chose Google Sheets + Apps Script over Firebase/Supabase — fully free, no card needed, and supports future webhook add-ons (Apple Shortcuts, email-based add)</td>
+        </tr>
+        <tr>
+          <td>6 Sep 2026</td>
+          <td>google-apps-script/Code.gs written</td>
+          <td><span class="badge done">Done</span></td>
+          <td>REST-style API (list/create/update/delete) over 4 sheets; verified against a local mock server before handing off — real deploy is a manual Google Sheets step (see below)</td>
+        </tr>
+        <tr>
+          <td>6 Sep 2026</td>
+          <td>Settings → Data Source (Google Sheets) connection UI</td>
+          <td><span class="badge done">Done</span></td>
+          <td>Paste Web App URL + secret token, Save &amp; Test Connection; app defaults to this screen until configured</td>
+        </tr>
+        <tr>
+          <td>6 Sep 2026</td>
+          <td>GitHub Pages deploy setup</td>
+          <td><span class="badge done">Done</span></td>
+          <td><code>.github/workflows/deploy.yml</code> + Vite <code>base</code> path set for repo <code>cashbook</code> — auto-deploys on every push, verified <code>npm run build</code> succeeds</td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td>Actually deploy: Apps Script + GitHub push</td>
+          <td><span class="badge planned">Planned</span></td>
+          <td>Needs your Google account (deploy the script) and Git installed + a GitHub repo (see "Going Online" steps above) — Claude can't do these without your accounts</td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td>Login</td>
+          <td><span class="badge planned">Planned</span></td>
+          <td>Not added yet — app works without login for now, per your earlier call to add it closer to going online</td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td>Bulk transaction import (CSV)</td>
+          <td><span class="badge planned">Planned</span></td>
+          <td>Requested as a future add-on</td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td>Add transaction via email</td>
+          <td><span class="badge planned">Planned</span></td>
+          <td>Requested as a future add-on — plan is Gmail-triggered Apps Script calling the same Code.gs endpoint</td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td>Apple Shortcuts integration</td>
+          <td><span class="badge planned">Planned</span></td>
+          <td>Requested as a future add-on — plan is a Shortcuts "Get Contents of URL" call to the same Code.gs endpoint</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note">Ei file ta protibar kaj hole update kore save hobe — notun kore ei page e re-open korle latest status dekha jabe.</p>
+  </section>
+</div>
+</body>
+</html>

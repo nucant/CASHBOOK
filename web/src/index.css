@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  color-scheme: light dark;
+  --bg: #f3f2f7;
+  --surface: #ffffff;
+  --hero: #17161c;
+  --hero-2: #232129;
+  --border: #e6e4ec;
+  --text: #17161c;
+  --muted: #837f8c;
+  --income: #2fbf71;
+  --income-soft: #e4f8ec;
+  --expense: #f0653e;
+  --expense-soft: #fdece5;
+  --accent: #6c5ce7;
+  --accent-soft: #eeebfd;
+}
+
+:root[data-theme='dark'] {
+  --bg: #121116;
+  --surface: #1b1a20;
+  --hero: #0c0b0f;
+  --hero-2: #1a1820;
+  --border: #2b2933;
+  --text: #f1eff5;
+  --muted: #9691a0;
+  --income-soft: #163526;
+  --expense-soft: #3a2018;
+  --accent-soft: #241f3d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+.font-display {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
