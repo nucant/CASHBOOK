@@ -1,6 +1,10 @@
 const URL_KEY = 'cb-sheets-url';
 const TOKEN_KEY = 'cb-sheets-token';
 
+export const DEFAULT_SHEETS_URL =
+  'https://script.google.com/macros/s/AKfycbzSTYFJ8wnIdVEaxi90bSLn2X33psFHeqojyibZazNmzoxeyu4BjP-DE50UngObxxU-/exec';
+export const DEFAULT_SHEETS_TOKEN = 'NUCANT007';
+
 export function getSheetsConfig(): { url: string; token: string } {
   return {
     url: localStorage.getItem(URL_KEY) ?? '',
@@ -21,4 +25,10 @@ export function clearSheetsConfig(): void {
 export function isConfigured(): boolean {
   const { url, token } = getSheetsConfig();
   return Boolean(url && token);
+}
+
+export function useDefaultsIfUnconfigured(): void {
+  if (!isConfigured()) {
+    setSheetsConfig(DEFAULT_SHEETS_URL, DEFAULT_SHEETS_TOKEN);
+  }
 }

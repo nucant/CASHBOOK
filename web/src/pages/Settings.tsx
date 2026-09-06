@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Plus, Download, Sun, Moon, Monitor, Smartphone, Wand2, Loader2, Check, X as XIcon } from 'lucide-react';
+import { Trash2, Plus, Download, Sun, Moon, Monitor, Smartphone, Wand2, Loader2, Check, X as XIcon, LogOut } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useData } from '../context/DataContext';
@@ -8,6 +8,7 @@ import { CategoryIcon } from '../components/CategoryIcon';
 import { formatDate, formatMoney } from '../lib/format';
 import type { ViewMode } from '../hooks/useDeviceMode';
 import { getSheetsConfig, setSheetsConfig } from '../lib/sheetsConfig';
+import { logout } from '../lib/authConfig';
 
 export type Theme = 'light' | 'dark' | 'system';
 
@@ -320,6 +321,17 @@ export function Settings({
           className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] py-3 text-sm font-medium"
         >
           <Download size={16} /> Export all transactions as PDF
+        </button>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={() => { logout(); window.location.reload(); }}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--border)] py-3 text-sm font-medium"
+          style={{ color: 'var(--expense)', borderColor: 'var(--border)' }}
+        >
+          <LogOut size={16} /> Sign Out
         </button>
       </div>
     </div>
