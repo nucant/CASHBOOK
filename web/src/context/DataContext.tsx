@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { fetchAll, createRow, updateRow, deleteRow } from '../lib/sheetsApi';
+import { fetchAll, createRow, updateRow, deleteRow, type AllData } from '../lib/sheetsApi';
 import { isConfigured } from '../lib/sheetsConfig';
 import { DEFAULT_CATEGORIES, type Account, type Category, type Transaction, type RecurringRule } from '../lib/types';
 import { monthKey } from '../lib/format';
@@ -25,6 +25,10 @@ interface DataContextValue {
 
 const DataContext = createContext<DataContextValue | null>(null);
 
+function sortTx(txs: Transaction[]): Transaction[] {
+  return [...txs].sort((a, b) => b.date.localeCompare(a.date));
+}
+
 export function DataProvider({ children }: { children: ReactNode }) {
   const [configured, setConfigured] = useState(isConfigured());
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -35,50 +39,65 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const autoConnected = useRef(false);
 
-  const refresh = useCallback(async () => {
-    if (!isConfigured()) return;
-    const data = await fetchAll();
+  const applyData = useCallback((data: AllData) => {
     setAccounts(data.accounts);
     setCategories(data.categories);
-    setTransactions([...data.transactions].sort((a, b) => b.date.localeCompare(a.date)));
+    setTransactions(sortTx(data.transactions));
     setRecurring(data.recurring);
   }, []);
 
+  const refresh = useCallback(async () => {
+    if (!isConfigured()) return;
+    applyData(await fetchAll());
+  }, [applyData]);
+
+  // One network round trip in the common case: fetch once, and only
+  // fetch again if we actually wrote new rows (first-time seeding or
+  // due recurring transactions) — otherwise `fresh` is already current.
   const connect = useCallback(async (onProgress?: (step: string) => void) => {
     setError(null);
     onProgress?.('Connecting to server…');
     const fresh = await fetchAll();
+    let wroteRows = false;
 
-    onProgress?.('Setting up database…');
     if (fresh.accounts.length === 0 && fresh.categories.length === 0) {
+      onProgress?.('Setting up database…');
       await createRow('accounts', { name: 'Cash', type: 'cash', color: '#22c55e', openingBalance: 0 });
       for (const c of DEFAULT_CATEGORIES) {
         await createRow('categories', c as unknown as Record<string, unknown>);
       }
+      wroteRows = true;
     }
 
     const now = new Date();
     const thisMonth = monthKey(now);
-    for (const rule of fresh.recurring) {
-      if (rule.lastGeneratedMonth === thisMonth) continue;
-      if (now.getDate() < rule.dayOfMonth) continue;
-      const date = new Date(now.getFullYear(), now.getMonth(), rule.dayOfMonth).toISOString().slice(0, 10);
-      await createRow('transactions', {
-        accountId: rule.accountId,
-        categoryId: rule.categoryId,
-        type: rule.type,
-        amount: rule.amount,
-        note: rule.note,
-        date,
-      });
-      await updateRow('recurring', rule.id, { lastGeneratedMonth: thisMonth });
+    const dueRules = fresh.recurring.filter((r) => r.lastGeneratedMonth !== thisMonth && now.getDate() >= r.dayOfMonth);
+    if (dueRules.length > 0) {
+      onProgress?.('Applying recurring transactions…');
+      for (const rule of dueRules) {
+        const date = new Date(now.getFullYear(), now.getMonth(), rule.dayOfMonth).toISOString().slice(0, 10);
+        await createRow('transactions', {
+          accountId: rule.accountId,
+          categoryId: rule.categoryId,
+          type: rule.type,
+          amount: rule.amount,
+          note: rule.note,
+          date,
+        });
+        await updateRow('recurring', rule.id, { lastGeneratedMonth: thisMonth });
+      }
+      wroteRows = true;
     }
 
-    await refresh();
+    if (wroteRows) {
+      applyData(await fetchAll());
+    } else {
+      applyData(fresh);
+    }
     setConfigured(true);
     setReady(true);
     onProgress?.('Ready to use!');
-  }, [refresh]);
+  }, [applyData]);
 
   useEffect(() => {
     if (!configured || autoConnected.current) return;
@@ -90,37 +109,78 @@ export function DataProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function withRefresh(fn: () => Promise<void>) {
+  // Mutations update local state directly from the known change instead
+  // of re-fetching all 4 sheets — cuts every add/edit/delete from two
+  // Apps Script round trips down to one.
+  async function addTransaction(data: Omit<Transaction, 'id'>) {
     try {
-      await fn();
-      await refresh();
+      const id = await createRow('transactions', data);
+      setTransactions((prev) => sortTx([...prev, { id, ...data }]));
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'unknown_error');
       throw e;
     }
   }
-
-  async function addTransaction(data: Omit<Transaction, 'id'>) {
-    await withRefresh(() => createRow('transactions', data).then(() => {}));
-  }
   async function updateTransaction(id: string, data: Partial<Omit<Transaction, 'id'>>) {
-    await withRefresh(() => updateRow('transactions', id, data));
+    try {
+      await updateRow('transactions', id, data);
+      setTransactions((prev) => sortTx(prev.map((t) => (t.id === id ? { ...t, ...data } : t))));
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'unknown_error');
+      throw e;
+    }
   }
   async function deleteTransaction(id: string) {
-    await withRefresh(() => deleteRow('transactions', id));
+    try {
+      await deleteRow('transactions', id);
+      setTransactions((prev) => prev.filter((t) => t.id !== id));
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'unknown_error');
+      throw e;
+    }
   }
   async function addAccount(data: Omit<Account, 'id'>) {
-    await withRefresh(() => createRow('accounts', data).then(() => {}));
+    try {
+      const id = await createRow('accounts', data);
+      setAccounts((prev) => [...prev, { id, ...data }]);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'unknown_error');
+      throw e;
+    }
   }
   async function setCategoryLimit(id: string, limit: number | undefined) {
-    await withRefresh(() => updateRow('categories', id, { monthlyLimit: limit ?? '' }));
+    try {
+      await updateRow('categories', id, { monthlyLimit: limit ?? '' });
+      setCategories((prev) => prev.map((c) => (c.id === id ? { ...c, monthlyLimit: limit } : c)));
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'unknown_error');
+      throw e;
+    }
   }
   async function addRecurringRule(data: Omit<RecurringRule, 'id'>) {
-    await withRefresh(() => createRow('recurring', data).then(() => {}));
+    try {
+      const id = await createRow('recurring', data);
+      setRecurring((prev) => [...prev, { id, ...data }]);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'unknown_error');
+      throw e;
+    }
   }
   async function deleteRecurringRule(id: string) {
-    await withRefresh(() => deleteRow('recurring', id));
+    try {
+      await deleteRow('recurring', id);
+      setRecurring((prev) => prev.filter((r) => r.id !== id));
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'unknown_error');
+      throw e;
+    }
   }
 
   return (
