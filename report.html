@@ -48,6 +48,10 @@ th{color:var(--muted);font-weight:600;font-size:.76rem;text-transform:uppercase;
 code{font-family:ui-monospace,Consolas,monospace;background:var(--accent-soft);color:var(--accent);padding:.1em .4em;border-radius:5px;font-size:.88em;}
 a{color:var(--accent);}
 ol li{line-height:1.5;}
+.step-group{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem;margin:22px 0 10px;}
+.step-group:first-of-type{margin-top:4px;}
+ol.steps{margin:0 0 4px;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;font-size:.9rem;}
+ol.steps pre{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;overflow-x:auto;font-family:ui-monospace,Consolas,monospace;font-size:.82rem;margin:8px 0 0;white-space:pre;}
 </style>
 </head>
 <body>
@@ -56,7 +60,7 @@ ol li{line-height:1.5;}
     <p class="eyebrow">Cashbook · Expense Tracker</p>
     <h1>Project Report</h1>
     <p class="sub">Requirements collected + progress log. Ei file ta local e save thakbe ebong protibar kichu change hole update kore dibo.</p>
-    <p class="updated">Last updated: 6 September 2026 — v3: Google Sheets backend + GitHub Pages deploy ready</p>
+    <p class="updated">Last updated: 6 September 2026 — Git installed, local repo committed. Deploy steps below are next.</p>
   </header>
 
   <section class="card">
@@ -79,15 +83,53 @@ ol li{line-height:1.5;}
   </section>
 
   <section class="card">
-    <h2>Going Online — steps left (your side)</h2>
-    <ol style="margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:10px;font-size:.92rem;">
-      <li><strong>Deploy the backend</strong>: open <a href="https://sheets.google.com">sheets.google.com</a> → new blank sheet → Extensions → Apps Script → paste <code>google-apps-script/Code.gs</code> from this project → change the <code>SECRET</code> value to your own random string → Deploy → New deployment → Web app → Execute as "Me" → Who has access "Anyone" → Deploy → approve the permission prompt (Advanced → Go to project) → copy the <code>/exec</code> URL.</li>
-      <li><strong>Install Git</strong> (not present on this machine yet) from <a href="https://git-scm.com/download/win">git-scm.com</a>.</li>
-      <li><strong>Push to GitHub</strong>: create a new repo named <code>cashbook</code> on GitHub → in this project folder run <code>git init</code>, <code>git add .</code>, <code>git commit -m "Cashbook v1"</code>, <code>git remote add origin &lt;your repo URL&gt;</code>, <code>git push -u origin main</code>.</li>
-      <li><strong>Enable Pages</strong>: on the GitHub repo → Settings → Pages → Source: "GitHub Actions". The included workflow builds and deploys automatically on every push.</li>
-      <li><strong>Connect the app</strong>: open the deployed site → Settings → Data Source (Google Sheets) → paste the Web App URL and your SECRET → Save &amp; Test Connection.</li>
+    <h2>Going Online — step by step</h2>
+
+    <p class="step-group">Phase 1 · Local setup <span class="badge done">Done</span></p>
+    <ol class="steps">
+      <li>Git installed on this machine</li>
+      <li>Project committed locally (<code>git init</code>, <code>git add .</code>, <code>git commit</code>), branch renamed to <code>main</code></li>
     </ol>
-    <p class="note">Ask Claude for the exact commands or Apps Script code any time — everything above is already written, just needs your Google/GitHub accounts to deploy.</p>
+
+    <p class="step-group">Phase 2 · Deploy the backend (Google Sheets) <span class="badge planned">Your turn</span></p>
+    <ol class="steps">
+      <li>Open <a href="https://sheets.google.com">sheets.google.com</a> → create a new blank spreadsheet (name it e.g. "Cashbook Data")</li>
+      <li>Menu: <strong>Extensions → Apps Script</strong></li>
+      <li>Delete the placeholder code, paste the full contents of <code>google-apps-script/Code.gs</code> from this project</li>
+      <li>Change the line <code>var SECRET = 'CHANGE_ME_TO_A_RANDOM_SECRET';</code> to your own random string (e.g. <code>cb_9f2k...</code>) — keep it, you'll need it later</li>
+      <li>Save (Ctrl+S) → click <strong>Deploy → New deployment</strong></li>
+      <li>Click the gear icon → select type <strong>Web app</strong></li>
+      <li>Execute as: <strong>Me</strong> · Who has access: <strong>Anyone</strong> → click <strong>Deploy</strong></li>
+      <li>Google will warn "Google hasn't verified this app" — click <strong>Advanced → Go to project (unsafe)</strong> → <strong>Allow</strong> (this is your own script, safe to allow)</li>
+      <li>Copy the Web app URL shown (ends in <code>/exec</code>) — you'll paste this into the app's Settings</li>
+    </ol>
+
+    <p class="step-group">Phase 3 · Push to GitHub <span class="badge planned">Your turn</span></p>
+    <ol class="steps">
+      <li>Go to <a href="https://github.com/new">github.com/new</a> → Repository name: <code>cashbook</code> → do <strong>not</strong> add a README/gitignore → <strong>Create repository</strong></li>
+      <li>In a terminal, inside the <code>A:\Cashbook</code> folder, run:
+        <pre>git remote add origin https://github.com/&lt;your-username&gt;/cashbook.git
+git push -u origin main</pre>
+      </li>
+      <li>A browser window will open asking you to log in to GitHub — log in to authorize the push</li>
+    </ol>
+
+    <p class="step-group">Phase 4 · Turn on GitHub Pages <span class="badge planned">Your turn</span></p>
+    <ol class="steps">
+      <li>On the GitHub repo page → <strong>Settings → Pages</strong></li>
+      <li>Under "Build and deployment", set Source to <strong>GitHub Actions</strong></li>
+      <li>Go to the <strong>Actions</strong> tab — a workflow run starts automatically (~1-2 min)</li>
+      <li>Once it's green, your site is live at <code>https://&lt;your-username&gt;.github.io/cashbook/</code></li>
+    </ol>
+
+    <p class="step-group">Phase 5 · Connect the app <span class="badge planned">Your turn</span></p>
+    <ol class="steps">
+      <li>Open your live site (the github.io link above) — it opens on the Settings screen since it's not connected yet</li>
+      <li>Under "Data Source (Google Sheets)", paste the <strong>Web app URL</strong> and <strong>SECRET</strong> from Phase 2</li>
+      <li>Tap <strong>Save &amp; Test Connection</strong> — once it shows "Connected", the app is fully online and usable from any device/browser, no laptop required</li>
+    </ol>
+
+    <p class="note">Any step stuck? Paste the exact error here and Claude will fix it.</p>
   </section>
 
   <section class="card">
