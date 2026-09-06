@@ -8,7 +8,6 @@ import { CategoryIcon } from '../components/CategoryIcon';
 import { formatDate, formatMoney } from '../lib/format';
 import type { ViewMode } from '../hooks/useDeviceMode';
 import { getSheetsConfig, setSheetsConfig } from '../lib/sheetsConfig';
-import { testConnection } from '../lib/sheetsApi';
 
 export type Theme = 'light' | 'dark' | 'system';
 
@@ -28,10 +27,11 @@ export function Settings({
     accounts,
     recurring,
     transactions,
+    configured,
     setCategoryLimit,
     addRecurringRule,
     deleteRecurringRule,
-    refresh,
+    connect,
   } = useData();
 
   const [showRuleForm, setShowRuleForm] = useState(false);
@@ -44,7 +44,9 @@ export function Settings({
 
   const [sheetsUrl, setSheetsUrl] = useState(() => getSheetsConfig().url);
   const [sheetsToken, setSheetsToken] = useState(() => getSheetsConfig().token);
-  const [connStatus, setConnStatus] = useState<'idle' | 'testing' | 'ok' | 'error'>('idle');
+  const [connStatus, setConnStatus] = useState<'idle' | 'connecting' | 'ok' | 'error'>(configured ? 'ok' : 'idle');
+  const [connStep, setConnStep] = useState('');
+  const [connError, setConnError] = useState('');
 
   const catMap = new Map(categories.map((c) => [c.id, c]));
   const accMap = new Map(accounts.map((a) => [a.id, a]));
@@ -53,13 +55,14 @@ export function Settings({
 
   async function saveConnection() {
     setSheetsConfig(sheetsUrl, sheetsToken);
-    setConnStatus('testing');
+    setConnStatus('connecting');
+    setConnError('');
     try {
-      await testConnection();
+      await connect((step) => setConnStep(step));
       setConnStatus('ok');
-      await refresh();
-    } catch {
+    } catch (e) {
       setConnStatus('error');
+      setConnError(e instanceof Error ? e.message : 'unknown_error');
     }
   }
 
@@ -125,15 +128,16 @@ export function Settings({
           <button
             type="button"
             onClick={saveConnection}
-            className="flex items-center justify-center gap-2 rounded-xl bg-[var(--hero)] py-2.5 text-sm font-semibold text-white"
+            disabled={connStatus === 'connecting'}
+            className="flex items-center justify-center gap-2 rounded-xl bg-[var(--hero)] py-2.5 text-sm font-semibold text-white disabled:opacity-60"
           >
-            {connStatus === 'testing' && <Loader2 size={16} className="animate-spin" />}
+            {connStatus === 'connecting' && <Loader2 size={16} className="animate-spin" />}
             {connStatus === 'ok' && <Check size={16} color="var(--income)" />}
             {connStatus === 'error' && <XIcon size={16} color="var(--expense)" />}
-            Save &amp; Test Connection
+            {connStatus === 'connecting' ? connStep || 'Connecting…' : 'Save & Test Connection'}
           </button>
-          {connStatus === 'ok' && <p className="text-xs" style={{ color: 'var(--income)' }}>Connected — data refreshed.</p>}
-          {connStatus === 'error' && <p className="text-xs" style={{ color: 'var(--expense)' }}>Could not connect. Check the URL and token.</p>}
+          {connStatus === 'ok' && <p className="text-xs" style={{ color: 'var(--income)' }}>Connected — {accounts.length} account(s), {categories.length} categories loaded.</p>}
+          {connStatus === 'error' && <p className="text-xs" style={{ color: 'var(--expense)' }}>Could not connect ({connError}). Check the URL and token.</p>}
         </div>
       </div>
 
