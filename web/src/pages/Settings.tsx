@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Plus, Download, Sun, Moon, Monitor, Smartphone, Wand2, Loader2, Check, X as XIcon, LogOut } from 'lucide-react';
+import { Trash2, Plus, Download, Sun, Moon, Monitor, Smartphone, Tablet, Wand2, Loader2, Check, X as XIcon, LogOut } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useData } from '../context/DataContext';
@@ -168,17 +168,18 @@ export function Settings({
 
       <div>
         <h3 className="mb-3 text-sm font-semibold text-[var(--muted)]">Layout</h3>
-        <div className="flex rounded-full border border-[var(--border)] bg-[var(--surface)] p-1">
+        <div className="flex flex-wrap gap-1 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-1">
           {([
             { key: 'auto', icon: Wand2, label: 'Auto' },
             { key: 'mobile', icon: Smartphone, label: 'Mobile' },
+            { key: 'tablet', icon: Tablet, label: 'Tablet' },
             { key: 'desktop', icon: Monitor, label: 'Desktop' },
           ] as { key: ViewMode; icon: typeof Wand2; label: string }[]).map(({ key, icon: Icon, label }) => (
             <button
               key={key}
               type="button"
               onClick={() => onModeChange(key)}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-xs font-medium"
+              className="flex flex-1 basis-[45%] items-center justify-center gap-1.5 rounded-full py-2 text-xs font-medium"
               style={{
                 background: mode === key ? 'var(--hero)' : 'transparent',
                 color: mode === key ? '#fff' : 'var(--muted)',

@@ -3,6 +3,7 @@ import { DataProvider } from './context/DataContext';
 import { useDeviceMode, type ViewMode } from './hooks/useDeviceMode';
 import type { Theme } from './pages/Settings';
 import { MobileApp } from './layouts/MobileApp';
+import { TabletApp } from './layouts/TabletApp';
 import { DesktopApp } from './layouts/DesktopApp';
 import { LoginScreen } from './components/LoginScreen';
 import { isLoggedIn } from './lib/authConfig';
@@ -45,11 +46,9 @@ export default function App() {
 
   return (
     <DataProvider>
-      {resolvedMode === 'desktop' ? (
-        <DesktopApp theme={theme} onThemeChange={setTheme} mode={mode} onModeChange={setMode} />
-      ) : (
-        <MobileApp theme={theme} onThemeChange={setTheme} mode={mode} onModeChange={setMode} />
-      )}
+      {resolvedMode === 'desktop' && <DesktopApp theme={theme} onThemeChange={setTheme} mode={mode} onModeChange={setMode} />}
+      {resolvedMode === 'tablet' && <TabletApp theme={theme} onThemeChange={setTheme} mode={mode} onModeChange={setMode} />}
+      {resolvedMode === 'mobile' && <MobileApp theme={theme} onThemeChange={setTheme} mode={mode} onModeChange={setMode} />}
     </DataProvider>
   );
 }

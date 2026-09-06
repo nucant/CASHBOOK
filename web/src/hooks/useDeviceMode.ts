@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 
-export type ViewMode = 'auto' | 'mobile' | 'desktop';
-export type ResolvedMode = 'mobile' | 'desktop';
+export type ViewMode = 'auto' | 'mobile' | 'tablet' | 'desktop';
+export type ResolvedMode = 'mobile' | 'tablet' | 'desktop';
 
-const QUERY = '(min-width: 1024px)';
+const DESKTOP_QUERY = '(min-width: 1024px)';
+const TABLET_QUERY = '(min-width: 768px)';
 
 function detect(): ResolvedMode {
   if (typeof window === 'undefined') return 'mobile';
-  return window.matchMedia(QUERY).matches ? 'desktop' : 'mobile';
+  if (window.matchMedia(DESKTOP_QUERY).matches) return 'desktop';
+  if (window.matchMedia(TABLET_QUERY).matches) return 'tablet';
+  return 'mobile';
 }
 
 export function useDeviceMode(mode: ViewMode): ResolvedMode {
@@ -18,11 +21,16 @@ export function useDeviceMode(mode: ViewMode): ResolvedMode {
       setResolved(mode);
       return;
     }
-    const mq = window.matchMedia(QUERY);
-    const handler = () => setResolved(mq.matches ? 'desktop' : 'mobile');
+    const desktopMq = window.matchMedia(DESKTOP_QUERY);
+    const tabletMq = window.matchMedia(TABLET_QUERY);
+    const handler = () => setResolved(detect());
     handler();
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+    desktopMq.addEventListener('change', handler);
+    tabletMq.addEventListener('change', handler);
+    return () => {
+      desktopMq.removeEventListener('change', handler);
+      tabletMq.removeEventListener('change', handler);
+    };
   }, [mode]);
 
   return resolved;
